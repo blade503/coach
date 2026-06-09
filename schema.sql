@@ -38,8 +38,11 @@ create table if not exists public.workouts (
   date       date not null,
   type       text not null,           -- 'salle' | 'maison' | 'marche'
   morning    boolean default false,
+  note       text,                     -- détail optionnel (exercices, ressenti)
   created_at timestamptz default now()
 );
+-- si la table workouts existait déjà sans la colonne note :
+alter table public.workouts add column if not exists note text;
 
 -- ============================================================
 --  Sécurité : Row Level Security
