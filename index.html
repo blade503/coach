@@ -158,6 +158,16 @@ ul { margin: 6px 0 6px 18px; } li { margin: 3px 0; font-size: 13.5px; }
     <table><thead><tr><th>Date</th><th>Poids</th><th>Δ</th><th></th></tr></thead>
     <tbody id="hist"></tbody></table>
   </div>
+
+  <div class="card">
+    <h2>🏆 Victoires non-balance</h2>
+    <p style="font-size:13.5px">Les progrès qui comptent autant que le chiffre : plus d'énergie, mieux dormir, monter les escaliers sans souffler, des vêtements plus à l'aise, plus de force…</p>
+    <div class="row">
+      <input type="text" id="v-input" placeholder="Ex : monté les escaliers sans souffler" style="flex:1;min-width:180px">
+      <button class="act" id="v-add">Ajouter</button>
+    </div>
+    <div id="v-list" style="margin-top:10px"></div>
+  </div>
 </div>
 
 <!-- DIÈTE -->
@@ -254,6 +264,19 @@ ul { margin: 6px 0 6px 18px; } li { margin: 3px 0; font-size: 13.5px; }
       <li>Commence par 2 matins/semaine.</li>
       <li>Verre d'eau + lumière du jour dès le lever.</li>
     </ul>
+  </div>
+  <div class="card">
+    <h2>📚 Bibliothèque d'exercices</h2>
+    <p style="font-size:13.5px">Technique propre = progrès + genou protégé. Chaque fiche a un lien « démo » vers une vidéo.</p>
+    <div class="ex"><b>Presse à cuisses</b><br><small>Dos bien calé, pieds largeur d'épaules. Descends jusqu'à ~90° au début (pas plus bas), pousse par les <b>talons</b>. <b>Genou</b> : amplitude courte, mouvement lent, jamais d'à-coups.</small><br><a href="https://www.youtube.com/results?search_query=presse+a+cuisses+technique+debutant" target="_blank">▶ Voir une démo</a></div>
+    <div class="ex"><b>Leg extension</b><br><small>Assis, tends la jambe sans donner de coup, tiens 1 s en haut, redescends lentement. <b>Genou</b> : charge légère, pas d'extension brusque.</small><br><a href="https://www.youtube.com/results?search_query=leg+extension+technique" target="_blank">▶ Voir une démo</a></div>
+    <div class="ex"><b>Leg curl</b><br><small>Ramène les talons vers les fessiers de façon contrôlée. Renforce les ischios, essentiel pour équilibrer le genou.</small><br><a href="https://www.youtube.com/results?search_query=leg+curl+technique" target="_blank">▶ Voir une démo</a></div>
+    <div class="ex"><b>Pont fessier</b><br><small>Allongé, pieds à plat, monte le bassin en serrant les fessiers, tiens 2 s. Le dos reste neutre.</small><br><a href="https://www.youtube.com/results?search_query=pont+fessier+glute+bridge" target="_blank">▶ Voir une démo</a></div>
+    <div class="ex"><b>Squat sur chaise (assis-debout)</b><br><small>Lève-toi/assieds-toi sans les mains, poids sur les talons, genoux dans l'axe des pieds. <b>Genou</b> : reste dans l'amplitude confortable.</small><br><a href="https://www.youtube.com/results?search_query=sit+to+stand+squat+chaise" target="_blank">▶ Voir une démo</a></div>
+    <div class="ex"><b>Tirage poitrine (machine)</b><br><small>Tire la barre vers le haut de la poitrine, épaules basses, sans te balancer.</small><br><a href="https://www.youtube.com/results?search_query=tirage+poitrine+machine+technique" target="_blank">▶ Voir une démo</a></div>
+    <div class="ex"><b>Développé (machine)</b><br><small>Pousse sans verrouiller brutalement les coudes, mouvement contrôlé à l'aller comme au retour.</small><br><a href="https://www.youtube.com/results?search_query=developpe+machine+pectoraux" target="_blank">▶ Voir une démo</a></div>
+    <div class="ex"><b>Gainage (planche)</b><br><small>Corps aligné de la tête aux talons, gainage abdos + fessiers, sans creuser le bas du dos.</small><br><a href="https://www.youtube.com/results?search_query=gainage+planche+technique" target="_blank">▶ Voir une démo</a></div>
+    <p class="note">Au moindre doute sur un mouvement, demande à un coach de la salle de vérifier ta posture une fois — surtout pour le genou.</p>
   </div>
 </div>
 
@@ -387,14 +410,39 @@ ul { margin: 6px 0 6px 18px; } li { margin: 3px 0; font-size: 13.5px; }
   </div>
   <div class="card">
     <h2>➕ J'ai fait ma séance</h2>
-    <p style="font-size:13.5px">Clique dès que c'est fait — c'est le geste qui compte, pas la perf.</p>
+    <p style="font-size:13.5px">Ajoute tes exercices (optionnel), puis clique sur le type de séance pour enregistrer.</p>
+    <h3>Détail des exercices</h3>
+    <div class="row">
+      <input type="text" id="g-exo-name" placeholder="Exercice (ex : Presse à cuisses)" style="flex:2;min-width:130px">
+      <input type="text" id="g-exo-sr" placeholder="3×12" style="flex:1;min-width:60px">
+      <input type="text" id="g-exo-w" placeholder="40 kg" style="flex:1;min-width:60px">
+      <button class="act ghost" id="g-exo-add">＋</button>
+    </div>
+    <div id="g-exo-pending" style="margin-top:8px"></div>
+    <input type="text" id="g-note" placeholder="Ressenti général (optionnel)" style="width:100%;margin-top:8px">
+    <h3>Enregistrer la séance</h3>
     <div class="row">
       <button class="act" id="g-salle">🏢 Salle</button>
       <button class="act" id="g-maison">🏠 Maison</button>
       <button class="act ghost" id="g-marche">🚶 Marche</button>
     </div>
-    <input type="text" id="g-note" placeholder="Détail (optionnel) : exercices, charges, ressenti…" style="width:100%;margin-top:8px">
     <div id="g-celebrate" class="milestone" style="display:none"></div>
+  </div>
+  <div class="card">
+    <h2>⏱️ Minuteur de repos</h2>
+    <div style="text-align:center">
+      <div id="t-display" style="font-size:46px;font-weight:700;color:#2563eb;font-variant-numeric:tabular-nums">01:30</div>
+      <div class="row" style="justify-content:center;margin:8px 0">
+        <button class="act ghost" data-sec="60">60s</button>
+        <button class="act ghost" data-sec="90">90s</button>
+        <button class="act ghost" data-sec="120">2 min</button>
+        <button class="act ghost" data-sec="180">3 min</button>
+      </div>
+      <div class="row" style="justify-content:center">
+        <button class="act" id="t-start">▶ Démarrer</button>
+        <button class="act ghost" id="t-reset">↺ Reset</button>
+      </div>
+    </div>
   </div>
   <div class="card">
     <h2>🏅 Trophées</h2>
@@ -447,7 +495,7 @@ const SUPABASE_ANON_KEY = "sb_publishable_Jjo8OomzyMxcIWqevpNSfA_PgRFAz5m";
 const HEIGHT = 1.87;
 let db = null, user = null;
 let weights = [], target = 95, habitsToday = {};
-let workouts = [], goal = 3;
+let workouts = [], goal = 3, pendingExos = [], victories = [];
 
 const $ = id => document.getElementById(id);
 const todayISO = () => new Date().toISOString().slice(0,10);
@@ -522,11 +570,14 @@ async function loadData() {
   let { data: h } = await db.from("habits").select("data").eq("date", todayISO()).maybeSingle();
   habitsToday = (h && h.data) ? h.data : {};
   // séances
-  let { data: wk } = await db.from("workouts").select("id,date,type,morning,note").order("date");
-  workouts = (wk || []).map(r => ({ id: r.id, date: r.date, type: r.type, morning: r.morning, note: r.note }));
+  let { data: wk } = await db.from("workouts").select("id,date,type,morning,note,exercises").order("date");
+  workouts = (wk || []).map(r => ({ id: r.id, date: r.date, type: r.type, morning: r.morning, note: r.note, exos: r.exercises || [] }));
+  // victoires non-balance
+  let { data: vk } = await db.from("victories").select("id,date,text").order("date");
+  victories = (vk || []).map(r => ({ id: r.id, date: r.date, text: r.text }));
   $("in-date").value = todayISO();
   $("in-target").value = target;
-  renderAll(); renderHabits(); renderGame();
+  renderAll(); renderHabits(); renderGame(); renderVictories();
 }
 
 // ---------- Tabs ----------
@@ -734,8 +785,10 @@ function renderGame(){
   const log=$("g-log"); log.innerHTML="";
   const TL={salle:"🏢 Salle",maison:"🏠 Maison",marche:"🚶 Marche"};
   [...workouts].reverse().slice(0,12).forEach(w=>{
+    const exosStr=(w.exos&&w.exos.length)?w.exos.map(e=>esc(e.n)+(e.sr?" "+esc(e.sr):"")+(e.w?" ("+esc(e.w)+")":"")).join("<br>"):"";
+    const detail=[exosStr, w.note?esc(w.note):""].filter(Boolean).join("<br>")||"—";
     const tr=document.createElement("tr");
-    tr.innerHTML='<td>'+w.date+'</td><td>'+(TL[w.type]||w.type)+'</td><td>'+(w.note?String(w.note).replace(/</g,"&lt;"):"—")+'</td><td><span class="del" data-id="'+w.id+'">✕</span></td>';
+    tr.innerHTML='<td>'+w.date+'</td><td>'+(TL[w.type]||w.type)+'</td><td style="font-size:12px;line-height:1.4">'+detail+'</td><td><span class="del" data-id="'+w.id+'">✕</span></td>';
     log.appendChild(tr);
   });
   log.querySelectorAll(".del").forEach(b=>b.onclick=async()=>{
@@ -748,11 +801,13 @@ async function addWorkout(type){
   const before=gStats(workouts,goal);
   const morning=new Date().getHours()<12;
   const note=($("g-note").value||"").trim();
+  const exos=pendingExos.slice();
   if (db && user) {
-    const { data: row, error } = await db.from("workouts").insert({ user_id:user.id, date:todayISO(), type, morning, note }).select().single();
-    if (!error && row) workouts.push({ id:row.id, date:row.date, type:row.type, morning:row.morning, note:row.note });
-  } else { workouts.push({ id:"tmp", date:todayISO(), type, morning, note }); }
+    const { data: row, error } = await db.from("workouts").insert({ user_id:user.id, date:todayISO(), type, morning, note, exercises:exos }).select().single();
+    if (!error && row) workouts.push({ id:row.id, date:row.date, type:row.type, morning:row.morning, note:row.note, exos:row.exercises||[] });
+  } else { workouts.push({ id:"tmp", date:todayISO(), type, morning, note, exos }); }
   $("g-note").value="";
+  pendingExos=[]; renderPending();
   const after=gStats(workouts,goal);
   let msg="🎉 Séance enregistrée ! +"+(XP_BY[type]||40)+" XP";
   if(after.level>before.level) msg+=" · 🆙 Niveau « "+after.levelName+" » !";
@@ -772,6 +827,62 @@ if ($("g-salle")) {
     renderGame();
   };
 }
+
+// ---------- Détail des exercices (builder) ----------
+function esc(s){return String(s==null?"":s).replace(/</g,"&lt;");}
+function renderPending(){
+  const box=$("g-exo-pending"); if(!box) return; box.innerHTML="";
+  pendingExos.forEach((e,i)=>{
+    const d=document.createElement("div");
+    d.style.cssText="font-size:13px;padding:4px 0;border-bottom:1px solid #f1f5f9";
+    d.innerHTML="• <b>"+esc(e.n)+"</b> "+(e.sr?esc(e.sr):"")+(e.w?" · "+esc(e.w):"")+' <span class="del" data-i="'+i+'">✕</span>';
+    box.appendChild(d);
+  });
+  box.querySelectorAll(".del").forEach(b=>b.onclick=()=>{ pendingExos.splice(parseInt(b.dataset.i),1); renderPending(); });
+}
+if ($("g-exo-add")) $("g-exo-add").onclick=()=>{
+  const n=$("g-exo-name").value.trim(); if(!n) return;
+  pendingExos.push({ n, sr:$("g-exo-sr").value.trim(), w:$("g-exo-w").value.trim() });
+  $("g-exo-name").value=""; $("g-exo-sr").value=""; $("g-exo-w").value=""; $("g-exo-name").focus(); renderPending();
+};
+
+// ---------- Minuteur de repos ----------
+let tRemain=90, tTimer=null;
+function tFmt(s){ const m=Math.floor(s/60), ss=s%60; return String(m).padStart(2,"0")+":"+String(ss).padStart(2,"0"); }
+function tRender(){ const el=$("t-display"); if(el) el.textContent=tFmt(Math.max(0,tRemain)); }
+function tBeep(){ try{ const a=new (window.AudioContext||window.webkitAudioContext)(); const o=a.createOscillator(), g=a.createGain(); o.connect(g); g.connect(a.destination); o.frequency.value=880; o.start(); g.gain.setValueAtTime(0.2,a.currentTime); g.gain.exponentialRampToValueAtTime(0.001,a.currentTime+0.6); o.stop(a.currentTime+0.6);}catch(e){} if(navigator.vibrate) navigator.vibrate(400); }
+document.querySelectorAll("[data-sec]").forEach(b=>b.onclick=()=>{ tRemain=parseInt(b.dataset.sec); tRender(); });
+if ($("t-start")) $("t-start").onclick=function(){
+  if(tTimer){ clearInterval(tTimer); tTimer=null; this.textContent="▶ Démarrer"; return; }
+  if(tRemain<=0) tRemain=90;
+  this.textContent="⏸ Pause";
+  tTimer=setInterval(()=>{ tRemain--; tRender(); if(tRemain<=0){ clearInterval(tTimer); tTimer=null; $("t-start").textContent="▶ Démarrer"; tBeep(); const d=$("t-display"); d.style.color="#16a34a"; setTimeout(()=>d.style.color="#2563eb",1500); } },1000);
+};
+if ($("t-reset")) $("t-reset").onclick=()=>{ if(tTimer){ clearInterval(tTimer); tTimer=null; $("t-start").textContent="▶ Démarrer"; } tRemain=90; tRender(); };
+tRender(); renderPending();
+
+// ---------- Victoires non-balance ----------
+function renderVictories(){
+  const box=$("v-list"); if(!box) return; box.innerHTML="";
+  [...victories].reverse().forEach(v=>{
+    const d=document.createElement("div");
+    d.style.cssText="padding:7px 0;border-bottom:1px solid #f1f5f9;font-size:13.5px";
+    d.innerHTML='🏆 '+esc(v.text)+' <span style="color:#94a3b8;font-size:11px">'+v.date+'</span> <span class="del" data-id="'+v.id+'">✕</span>';
+    box.appendChild(d);
+  });
+  box.querySelectorAll(".del").forEach(b=>b.onclick=async()=>{
+    if(db&&user&&b.dataset.id!=="tmp") await db.from("victories").delete().eq("id",b.dataset.id);
+    victories=victories.filter(x=>String(x.id)!==String(b.dataset.id)); renderVictories();
+  });
+}
+if ($("v-add")) $("v-add").onclick=async()=>{
+  const t=$("v-input").value.trim(); if(!t) return;
+  if (db && user) {
+    const { data: row, error } = await db.from("victories").insert({ user_id:user.id, date:todayISO(), text:t }).select().single();
+    if (!error && row) victories.push({ id:row.id, date:row.date, text:row.text });
+  } else { victories.push({ id:"tmp", date:todayISO(), text:t }); }
+  $("v-input").value=""; renderVictories();
+};
 
 // ---------- PWA : enregistrement du service worker ----------
 if ("serviceWorker" in navigator) {

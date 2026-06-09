@@ -38,25 +38,38 @@ create table if not exists public.workouts (
   date       date not null,
   type       text not null,           -- 'salle' | 'maison' | 'marche'
   morning    boolean default false,
-  note       text,                     -- détail optionnel (exercices, ressenti)
+  note       text,                     -- ressenti général optionnel
+  exercises  jsonb default '[]'::jsonb, -- détail : [{n, sr, w}]
   created_at timestamptz default now()
 );
--- si la table workouts existait déjà sans la colonne note :
+-- si la table workouts existait déjà sans ces colonnes :
 alter table public.workouts add column if not exists note text;
+alter table public.workouts add column if not exists exercises jsonb default '[]'::jsonb;
+
+-- 5) Victoires non-balance ---------------------------------------------
+create table if not exists public.victories (
+  id         uuid primary key default gen_random_uuid(),
+  user_id    uuid not null default auth.uid() references auth.users(id) on delete cascade,
+  date       date not null,
+  text       text not null,
+  created_at timestamptz default now()
+);
 
 -- ============================================================
 --  Sécurité : Row Level Security
 --  Chaque utilisateur ne voit/modifie QUE ses propres lignes.
 -- ============================================================
-alter table public.weights  enable row level security;
-alter table public.habits   enable row level security;
-alter table public.settings enable row level security;
-alter table public.workouts enable row level security;
+alter table public.weights   enable row level security;
+alter table public.habits    enable row level security;
+alter table public.settings  enable row level security;
+alter table public.workouts  enable row level security;
+alter table public.victories enable row level security;
 
-drop policy if exists "own_weights"  on public.weights;
-drop policy if exists "own_habits"    on public.habits;
-drop policy if exists "own_settings" on public.settings;
-drop policy if exists "own_workouts" on public.workouts;
+drop policy if exists "own_weights"   on public.weights;
+drop policy if exists "own_habits"     on public.habits;
+drop policy if exists "own_settings"   on public.settings;
+drop policy if exists "own_workouts"   on public.workouts;
+drop policy if exists "own_victories"  on public.victories;
 
 create policy "own_weights" on public.weights
   for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
@@ -70,4 +83,7 @@ create policy "own_settings" on public.settings
 create policy "own_workouts" on public.workouts
   for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
 
--- Fin. Tu peux vérifier dans Table Editor que les 4 tables existent.
+create policy "own_victories" on public.victories
+  for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+-- Fin. Tu peux vérifier dans Table Editor que les 5 tables existent.
