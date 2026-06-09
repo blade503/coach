@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="theme-color" content="#2563eb">
+<title>Mon coach perte de poids</title>
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="apple-touch-icon" href="./apple-touch-icon.png">
+<link rel="icon" type="image/png" href="./icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Coach">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<style>
+:root { color-scheme: light; }
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background: #f4f6f9; color: #1c2530; line-height: 1.5; padding: 14px; }
+.wrap { max-width: 920px; margin: 0 auto; }
+header h1 { font-size: 21px; font-weight: 700; }
+header .sub { color: #64748b; font-size: 13px; margin-top: 2px; display:flex; justify-content:space-between; align-items:center; gap:8px; }
+.tabs { display: flex; gap: 6px; margin: 14px 0; flex-wrap: wrap; }
+.tab { flex: 1; min-width: 90px; padding: 10px 6px; border: none; border-radius: 10px; background: #e7ebf1;
+  color: #475569; font-weight: 600; font-size: 13px; cursor: pointer; transition: .15s; }
+.tab.active { background: #2563eb; color: #fff; box-shadow: 0 4px 12px rgba(37,99,235,.3); }
+.panel { display: none; }
+.panel.active { display: block; animation: fade .25s; }
+@keyframes fade { from { opacity: 0; transform: translateY(6px);} to {opacity:1; transform:none;} }
+.card { background: #fff; border-radius: 14px; padding: 16px; margin-bottom: 13px; box-shadow: 0 1px 3px rgba(16,24,40,.06); }
+.card h2 { font-size: 16px; margin-bottom: 12px; }
+.card h3 { font-size: 14px; margin: 14px 0 6px; color: #334155; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px,1fr)); gap: 10px; }
+.stat { background: #f8fafc; border: 1px solid #eef2f7; border-radius: 12px; padding: 12px; text-align: center; }
+.stat .num { font-size: 22px; font-weight: 700; color: #2563eb; }
+.stat .lbl { font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: .03em; margin-top: 2px; }
+.row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+input { padding: 10px 11px; border: 1px solid #d4dbe3; border-radius: 9px; font-size: 15px; background:#fff; }
+button.act { padding: 10px 16px; border: none; border-radius: 9px; background: #2563eb; color: #fff; font-weight: 600; cursor: pointer; font-size: 14px; }
+button.act:hover { background: #1d4ed8; }
+button.ghost { background: #eef2f7; color: #475569; }
+button.link { background:none; border:none; color:#2563eb; cursor:pointer; font-size:13px; text-decoration:underline; }
+.bar { height: 12px; border-radius: 8px; background: #e7ebf1; overflow: hidden; margin: 8px 0; }
+.bar > div { height: 100%; background: linear-gradient(90deg,#22c55e,#16a34a); border-radius: 8px; transition: width .4s; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th, td { text-align: left; padding: 7px 8px; border-bottom: 1px solid #eef2f7; }
+th { color: #64748b; font-weight: 600; font-size: 11px; text-transform: uppercase; }
+.tag { display: inline-block; padding: 2px 9px; border-radius: 20px; font-size: 12px; font-weight: 600; margin:2px 0; }
+.yes { background: #dcfce7; color: #15803d; }
+.no { background: #fee2e2; color: #b91c1c; }
+.sneak { background: #fef3c7; color: #92400e; }
+.meal { border-left: 3px solid #2563eb; padding: 4px 0 4px 12px; margin: 10px 0; }
+.meal span { color: #64748b; font-size: 13px; }
+.ex { padding: 10px 0; border-bottom: 1px solid #f1f5f9; }
+.ex small { color: #64748b; }
+.knee { background:#eff6ff; border:1px solid #bfdbfe; border-radius:10px; padding:10px 12px; font-size:13px; color:#1e40af; margin-top:6px;}
+.motiv { font-size: 19px; font-weight: 600; text-align: center; padding: 26px 16px; line-height: 1.4;
+  background: linear-gradient(135deg,#2563eb,#7c3aed); color:#fff; border-radius: 14px; }
+.del { color:#cbd5e1; cursor:pointer; font-weight:700; }
+.del:hover { color:#ef4444; }
+.note { font-size: 12px; color: #94a3b8; margin-top: 8px; }
+.warn { background:#fffbeb; border:1px solid #fde68a; color:#854d0e; font-size:12.5px; padding:10px 12px; border-radius:10px; margin-top:10px; }
+.milestone { background:#f0fdf4; border:1px solid #bbf7d0; color:#15803d; padding:8px 12px; border-radius:10px; font-size:13px; margin-top:8px; }
+ul { margin: 6px 0 6px 18px; } li { margin: 3px 0; font-size: 13.5px; }
+/* Login */
+#auth { max-width: 380px; margin: 8vh auto 0; }
+#auth .card { padding: 24px; }
+#auth input { width: 100%; margin-bottom: 10px; }
+#auth button.act { width: 100%; }
+.msg { font-size: 13px; margin-top: 10px; min-height: 18px; }
+.msg.err { color: #b91c1c; } .msg.ok { color: #15803d; }
+.hidden { display: none !important; }
+.setup-warn { background:#fef2f2; border:1px solid #fecaca; color:#991b1b; padding:12px 14px; border-radius:12px; font-size:13px; margin-bottom:14px; }
+</style>
+</head>
+<body>
+
+<!-- ===================== ÉCRAN DE CONNEXION ===================== -->
+<div id="auth" class="hidden">
+  <div style="text-align:center; margin-bottom:18px">
+    <div style="font-size:32px">🏋️</div>
+    <h1 style="font-size:20px">Mon coach perte de poids</h1>
+  </div>
+  <div class="card">
+    <h2 id="auth-title">Connexion</h2>
+    <input type="email" id="email" placeholder="ton@email.fr" autocomplete="email">
+    <input type="password" id="password" placeholder="mot de passe" autocomplete="current-password">
+    <button class="act" id="auth-btn">Se connecter</button>
+    <p class="msg" id="auth-msg"></p>
+    <p style="font-size:13px; margin-top:8px">
+      <span id="toggle-txt">Première installation ?</span>
+      <button class="link" id="toggle-mode">Créer mon compte</button>
+    </p>
+  </div>
+</div>
+
+<!-- ===================== APPLICATION ===================== -->
+<div id="app" class="wrap hidden">
+<header>
+  <h1>🏋️ Mon coach perte de poids</h1>
+  <div class="sub"><span>187 cm · objectif suivi soutenu</span><button class="link" id="logout">Déconnexion</button></div>
+</header>
+
+<div id="setup-warn" class="setup-warn hidden">
+  ⚠️ Configuration manquante : édite <b>index.html</b> et renseigne <code>SUPABASE_URL</code> et <code>SUPABASE_ANON_KEY</code> en haut du script.
+</div>
+
+<div class="tabs">
+  <button class="tab active" data-p="suivi">📉 Suivi</button>
+  <button class="tab" data-p="diete">🍽️ Diète</button>
+  <button class="tab" data-p="sport">💪 Sport</button>
+  <button class="tab" data-p="prep">🍱 Prep</button>
+  <button class="tab" data-p="idees">🍴 Idées</button>
+  <button class="tab" data-p="seances">🎮 Séances</button>
+  <button class="tab" data-p="motiv">🔥 Motiv</button>
+</div>
+
+<!-- SUIVI -->
+<div class="panel active" id="suivi">
+  <div class="card">
+    <h2>📊 Mes chiffres</h2>
+    <div class="grid">
+      <div class="stat"><div class="num" id="s-current">–</div><div class="lbl">Poids actuel</div></div>
+      <div class="stat"><div class="num" id="s-lost">–</div><div class="lbl">Perdu</div></div>
+      <div class="stat"><div class="num" id="s-left">–</div><div class="lbl">Reste</div></div>
+      <div class="stat"><div class="num" id="s-bmi">–</div><div class="lbl">IMC</div></div>
+    </div>
+    <h3>Progression vers l'objectif</h3>
+    <div class="bar"><div id="prog-bar" style="width:0%"></div></div>
+    <p class="note" id="prog-txt"></p>
+    <div class="milestone" id="milestone" style="display:none"></div>
+  </div>
+
+  <div class="card">
+    <h2>➕ Noter mon poids</h2>
+    <div class="row">
+      <input type="date" id="in-date">
+      <input type="number" id="in-kg" step="0.1" placeholder="kg" style="width:90px">
+      <button class="act" id="add-btn">Enregistrer</button>
+    </div>
+    <p class="note">Pèse-toi le matin, à jeun. C'est la tendance sur la semaine qui compte, pas le chiffre d'un jour.</p>
+  </div>
+
+  <div class="card">
+    <h2>📈 Ma courbe</h2>
+    <canvas id="chart" height="200"></canvas>
+  </div>
+
+  <div class="card">
+    <h2>🗂️ Historique</h2>
+    <div class="row" style="margin-bottom:10px">
+      <label style="font-size:13px;color:#475569">Objectif (kg) :</label>
+      <input type="number" id="in-target" step="0.5" style="width:80px">
+      <button class="act ghost" id="save-target">OK</button>
+    </div>
+    <table><thead><tr><th>Date</th><th>Poids</th><th>Δ</th><th></th></tr></thead>
+    <tbody id="hist"></tbody></table>
+  </div>
+</div>
+
+<!-- DIÈTE -->
+<div class="panel" id="diete">
+  <div class="card">
+    <h2>🎯 Tes cibles du jour</h2>
+    <div class="grid">
+      <div class="stat"><div class="num">~2200</div><div class="lbl">kcal / jour</div></div>
+      <div class="stat"><div class="num">180 g</div><div class="lbl">Protéines</div></div>
+      <div class="stat"><div class="num">225 g</div><div class="lbl">Glucides</div></div>
+      <div class="stat"><div class="num">65 g</div><div class="lbl">Lipides</div></div>
+    </div>
+    <p class="note">Dépense estimée ~3100 kcal/jour. Manger ~2200 kcal = déficit ~900 kcal → ~0,8 à 1 kg/semaine (plus au début, c'est l'eau, normal).</p>
+    <div class="warn">⚠️ Vu ton point de départ, fais valider ce plan par ton médecin (bilan, tension, feu vert sport). Ne descends pas sous ~1900 kcal sans suivi.</div>
+  </div>
+  <div class="card">
+    <h2>🥦 Les légumes, ta version</h2>
+    <h3>✅ On garde</h3>
+    <p><span class="tag yes">Haricots verts</span> <span class="tag yes">Fruits</span> <span class="tag yes">Tomate en sauce</span> <span class="tag yes">Pommes de terre</span></p>
+    <h3>🥷 On planque</h3>
+    <p><span class="tag sneak">Courgette &amp; carotte râpées</span> dans lasagnes, bolognaises, gratins, sauces tomate mixées, boulettes.</p>
+    <h3>💊 Filet de sécurité</h3>
+    <p>Un multivitamines + fibres (psyllium) peut combler les manques. À valider avec ton médecin/pharmacien.</p>
+  </div>
+  <div class="card">
+    <h2>🍽️ Journée type (~2200 kcal)</h2>
+    <div class="meal"><b>Petit-déj</b> — <span>60 g flocons d'avoine + lait + banane + whey OU 3 œufs + pain complet.</span></div>
+    <div class="meal"><b>Déjeuner</b> — <span>180 g poulet + 200 g riz/pâtes + haricots verts. Sauce tomate à la courgette mixée.</span></div>
+    <div class="meal"><b>Collation</b> — <span>1 yaourt grec/skyr + 1 fruit + poignée d'amandes.</span></div>
+    <div class="meal"><b>Dîner</b> — <span>Poisson ou steak 5% + pommes de terre + haricots verts. OU lasagnes maison.</span></div>
+    <p class="note">2 L d'eau/jour. Café/thé OK. Sodas/jus sucrés et alcool = à couper en priorité.</p>
+  </div>
+  <div class="card">
+    <h2>🥤 Boissons</h2>
+    <p><span class="tag yes">Coca Zero</span> <span class="tag yes">Monster Ultra (1/j max)</span> <span class="tag yes">Sirop menthe zéro</span> — ~0 kcal, OK sur le déficit.</p>
+    <p class="note">Attention caféine du Monster (~150 mg) : rien après 15h pour ne pas plomber ton sommeil (et ton réveil).</p>
+  </div>
+</div>
+
+<!-- SPORT -->
+<div class="panel" id="sport">
+  <div class="card">
+    <h2>🦵 Priorité : ton genou gauche</h2>
+    <div class="knee">Douleur sans atteinte osseuse → on <b>renforce</b> autour (quadriceps, fessiers, ischios), on évite l'impact (saut, course) et les flexions profondes au début. Douleur vive = on arrête le mouvement.</div>
+  </div>
+  <div class="card">
+    <h2>📅 Ta semaine type</h2>
+    <table><tbody>
+      <tr><td><b>Lun · Mer · Ven</b></td><td>Télétravail (réunion 10h) → séance salle le matin, ton créneau idéal.</td></tr>
+      <tr><td><b>Mar · Jeu</b></td><td>Bureau (départ 9h) + souvent une sortie le soir (amis, famille) → tes jours de repos naturels. Profite sans culpabiliser ; une marche le midi si tu peux.</td></tr>
+      <tr><td><b>Week-end</b></td><td>Libre : une marche, du repos.</td></tr>
+    </tbody></table>
+    <p class="note">3 séances de muscu (lun/mer/ven) + récup les jours bureau = le rythme idéal pour débuter et ménager ton genou.</p>
+  </div>
+
+  <div class="card">
+    <h2>🕗 Ton matin télétravail (réunion 10h)</h2>
+    <table><tbody>
+      <tr><td><b>7h15</b></td><td>Réveil + verre d'eau</td></tr>
+      <tr><td><b>7h25</b></td><td>Pesée à jeun → notée dans Suivi</td></tr>
+      <tr><td><b>7h35</b></td><td>Départ salle (sac prêt la veille)</td></tr>
+      <tr><td><b>7h50</b></td><td>Séance ~50 min</td></tr>
+      <tr><td><b>8h55</b></td><td>Retour</td></tr>
+      <tr><td><b>9h10</b></td><td>Douche</td></tr>
+      <tr><td><b>9h30</b></td><td>Petit-déj + café</td></tr>
+      <tr><td><b>10h00</b></td><td>✅ Réunion, séance déjà faite</td></tr>
+    </tbody></table>
+    <p class="note">Jours « sans » : garde au moins 20 min de marche dehors.</p>
+  </div>
+  <div class="card">
+    <h2>🏠 Phase 1 — Maison (sem. 1-4)</h2>
+    <div class="ex"><b>Marche rapide</b><br><small>20-30 min/jour, zéro impact.</small></div>
+    <div class="ex"><b>Extensions de jambe assises</b><br><small>Tiens 3 s en haut. 3 × 12/jambe.</small></div>
+    <div class="ex"><b>Pont fessier</b><br><small>3 × 15.</small></div>
+    <div class="ex"><b>Assis-debout sur chaise</b><br><small>3 × 12.</small></div>
+    <div class="ex"><b>Pompes genoux / mur</b><br><small>3 × 10.</small></div>
+    <div class="ex"><b>Gainage</b><br><small>20-30 s × 3.</small></div>
+  </div>
+  <div class="card">
+    <h2>🏢 Phase 2 — Salle (dès sem. 4-5)</h2>
+    <div class="ex"><b>Vélo / elliptique</b><br><small>15-20 min, sans impact.</small></div>
+    <div class="ex"><b>Presse à cuisses légère</b><br><small>Amplitude courte. 3 × 12.</small></div>
+    <div class="ex"><b>Leg curl + leg extension</b><br><small>Renfort genou. 3 × 12.</small></div>
+    <div class="ex"><b>Tirage + développé machine</b><br><small>3 × 10.</small></div>
+    <div class="ex"><b>Rameur doux</b><br><small>Cardio peu d'impact.</small></div>
+  </div>
+  <div class="card">
+    <h2>⏰ Réveil du matin</h2>
+    <ul>
+      <li>Couche-toi 30 min plus tôt (le vrai levier).</li>
+      <li>Réveil loin du lit.</li>
+      <li>Sac de sport prêt devant la porte.</li>
+      <li>Règle des 5 secondes : 5-4-3-2-1, debout.</li>
+      <li>Commence par 2 matins/semaine.</li>
+      <li>Verre d'eau + lumière du jour dès le lever.</li>
+    </ul>
+  </div>
+</div>
+
+<!-- MEAL PREP -->
+<div class="panel" id="prep">
+  <div class="card">
+    <h2>🍱 Comment ça marche</h2>
+    <p style="font-size:13.5px">Cuisine 1-2 fois/semaine, remplis des boîtes. Quantités <b>par portion</b> et <b>pour 4</b>. Viande/poisson = poids <b>cru</b> ; riz/pâtes/avoine = poids <b>sec</b>.</p>
+    <ul>
+      <li>Cuit : 3-4 jours au frigo, ou 2 mois au congélateur.</li>
+      <li>Étiquette + date sur chaque boîte.</li>
+      <li>Courgette/carotte râpées et fondues dans les sauces = invisibles.</li>
+    </ul>
+    <p class="note">Chaque plat ≈ 600 kcal · 45 g protéines.</p>
+  </div>
+  <div class="card"><h2>1️⃣ Poulet – riz – haricots verts</h2>
+    <p class="note">~635 kcal · 46 g prot.</p>
+    <h3>Par portion</h3><p style="font-size:13.5px">180 g poulet · 80 g riz (sec) · 200 g haricots verts · 1 c.à.s huile · ail, paprika</p>
+    <h3>Batch ×4</h3><p style="font-size:13.5px">720 g poulet · 320 g riz · 800 g haricots · 4 c.à.s huile</p></div>
+  <div class="card"><h2>2️⃣ Bolognaise protéinée</h2>
+    <p class="note">Courgette+carotte mixées. ~610 kcal · 46 g prot.</p>
+    <h3>Par portion</h3><p style="font-size:13.5px">150 g bœuf 5% · 60 g lentilles cuites · 100 g courgette+carotte · 150 g sauce tomate · 80 g pâtes (sèches)</p>
+    <h3>Batch ×4</h3><p style="font-size:13.5px">600 g bœuf · 240 g lentilles · 400 g légumes · 600 g sauce · 320 g pâtes</p></div>
+  <div class="card"><h2>3️⃣ Lasagnes maison</h2>
+    <p class="note">~660 kcal · 42 g prot.</p>
+    <h3>Par portion</h3><p style="font-size:13.5px">130 g bœuf 5% · 100 g courgette+carotte mixées · 150 g sauce tomate · 3 plaques · 60 g béchamel allégée · 25 g fromage</p>
+    <h3>Batch ×4</h3><p style="font-size:13.5px">520 g bœuf · 400 g légumes · 600 g sauce · 12 plaques · 240 g béchamel · 100 g fromage</p></div>
+  <div class="card"><h2>4️⃣ Boulettes – pommes de terre</h2>
+    <p class="note">Carotte cachée. ~605 kcal · 38 g prot.</p>
+    <h3>Par portion</h3><p style="font-size:13.5px">150 g bœuf 5% · 30 g carotte râpée · 250 g pommes de terre · 150 g sauce tomate · 1 œuf/4 boulettes</p>
+    <h3>Batch ×4</h3><p style="font-size:13.5px">600 g bœuf · 120 g carotte · 1 kg p.de terre · 600 g sauce · 1 œuf</p></div>
+  <div class="card"><h2>5️⃣ Cabillaud – riz – haricots verts</h2>
+    <p class="note">~570 kcal · 44 g prot.</p>
+    <h3>Par portion</h3><p style="font-size:13.5px">200 g cabillaud (ou 150 g saumon) · 80 g riz (sec) · 200 g haricots verts · 1 c.à.s huile · citron</p>
+    <h3>Batch ×4</h3><p style="font-size:13.5px">800 g cabillaud · 320 g riz · 800 g haricots · 4 c.à.s huile</p></div>
+  <div class="card"><h2>6️⃣ Chili con carne</h2>
+    <p class="note">~620 kcal · 42 g prot.</p>
+    <h3>Par portion</h3><p style="font-size:13.5px">150 g bœuf 5% · 120 g haricots rouges cuits · 150 g tomate concassée · 60 g riz (sec) · cumin, paprika</p>
+    <h3>Batch ×4</h3><p style="font-size:13.5px">600 g bœuf · 480 g haricots rouges · 600 g tomate · 240 g riz</p></div>
+  <div class="card"><h2>7️⃣ Curry de poulet</h2>
+    <p class="note">~640 kcal · 44 g prot.</p>
+    <h3>Par portion</h3><p style="font-size:13.5px">180 g poulet · 80 g riz (sec) · 80 ml lait de coco allégé · 100 g sauce tomate · curry, gingembre</p>
+    <h3>Batch ×4</h3><p style="font-size:13.5px">720 g poulet · 320 g riz · 320 ml lait coco · 400 g sauce</p></div>
+  <div class="card"><h2>🌅 Petit-déj à l'avance</h2>
+    <h3>Overnight oats (×1)</h3><p style="font-size:13.5px">60 g avoine · 150 g skyr · 1 dose whey · 100 ml lait · 1 banane. ~480 kcal · 40 g prot.</p>
+    <h3>Muffins aux œufs (×6)</h3><p style="font-size:13.5px">8 œufs · 100 g jambon/dinde · 50 g fromage. Four 18 min/180°C. ~120 kcal · 11 g prot/muffin. 4 jours au frigo.</p></div>
+  <div class="card"><h2>🛒 Courses type (1 semaine)</h2>
+    <p style="font-size:13.5px">~2 kg poulet · 1,5 kg bœuf 5% · 800 g cabillaud · 18 œufs · skyr/yaourt grec · whey · riz · pâtes · plaques lasagne · avoine · pommes de terre · haricots verts (surgelés OK) · courgettes · carottes · lentilles · haricots rouges · sauce/concassé tomate · lait coco allégé · fromage râpé · huile d'olive · épices · fruits.</p></div>
+</div>
+
+<!-- IDÉES / SUGGESTIONS -->
+<div class="panel" id="idees">
+  <div class="card">
+    <h2>🍴 Tes plats en rotation</h2>
+    <p style="font-size:13.5px">Garde 4-5 plats simples et tourne dessus. Tu les connais par cœur, tu ne réfléchis plus.</p>
+    <div class="meal"><b>Bœuf haché 5% + riz</b> — <span>ta base. Ail, paprika fumé, sauce soja légère.</span></div>
+    <div class="meal"><b>Poulet + pommes de terre</b> — <span>ail, herbes de Provence, paprika, citron.</span></div>
+    <div class="meal"><b>Dinde hachée + pâtes + sauce tomate</b> — <span>courgette mixée cachée, basilic, ail.</span></div>
+    <div class="meal"><b>Cabillaud ou saumon + riz</b> — <span>citron, ail, aneth.</span></div>
+    <div class="meal"><b>Bœuf haché + patate douce</b> — <span>cumin, paprika, oignon.</span></div>
+  </div>
+  <div class="card">
+    <h2>🌶️ Varier sans calories</h2>
+    <p style="font-size:13.5px">Le même plat change complètement selon l'assaisonnement :</p>
+    <p><span class="tag yes">Ail</span> <span class="tag yes">Paprika fumé</span> <span class="tag yes">Cumin</span> <span class="tag yes">Curry</span> <span class="tag yes">Herbes</span> <span class="tag yes">Sauce soja légère</span> <span class="tag yes">Moutarde</span> <span class="tag yes">Citron</span> <span class="tag yes">Harissa</span></p>
+    <p class="note">La sauce soja est salée → vas-y mollo et bois bien (le sel retient l'eau et brouille la balance).</p>
+  </div>
+  <div class="card">
+    <h2>🍗 Encas qui calent vraiment</h2>
+    <p style="font-size:13.5px">Mise sur les protéines : ça coupe la faim bien mieux que le reste.</p>
+    <ul>
+      <li>Blanc de poulet en tranches</li>
+      <li>Œufs durs (à préparer d'avance)</li>
+      <li>Skyr / yaourt grec / fromage blanc</li>
+      <li>Tranches de dinde, thon</li>
+      <li>Shake de whey (~20-25 g protéines, jours pressés ou post-séance)</li>
+      <li>Pompote / fruit pour le côté sucré + un peu de fibres</li>
+    </ul>
+    <p class="note">Astuce : 1 L d'eau (menthe zéro) pour faire le tri entre faim d'ennui et vraie faim — mais si la faim reste, mange vraiment.</p>
+  </div>
+  <div class="card">
+    <h2>🍫 Plaisir malin</h2>
+    <p style="font-size:13.5px"><b>Gâteau au yaourt maison</b> : yaourt 0% + œufs (+ un filet d'huile d'olive à la place du beurre). Coupe-le en tranches dès la sortie du four, une part à la fois.</p>
+    <p style="font-size:13.5px">Versions « boostées » : remplacer une part de farine par de la whey ou de la poudre d'amande (plus rassasiant) ; pépites de chocolat noir (goût plus fort, tu en mets moins).</p>
+  </div>
+  <div class="card">
+    <h2>🥤 La whey, en option</h2>
+    <p style="font-size:13.5px">Pas obligatoire — les aliments entiers suffisent. Mais pratique pour compléter tes protéines un jour sans temps de cuisine, ou après la salle.</p>
+    <ul>
+      <li><b>Clear whey</b> (type Isoclear) : légère, façon jus fruité.</li>
+      <li><b>Whey classique</b> (type Designer) : façon milkshake, plus gourmande.</li>
+    </ul>
+    <p class="note">~20-25 g de protéines par dose. Commence par un petit format / boîte d'échantillons pour tester les parfums.</p>
+  </div>
+  <div class="card">
+    <h2>💊 Compléments (pense-bête)</h2>
+    <p style="font-size:13.5px">Rien d'indispensable, juste un filet de sécurité utile :</p>
+    <ul>
+      <li><b>Multivitamines</b> — assurance vu le peu de légumes.</li>
+      <li><b>Vitamine D</b> — souvent basse, surtout en télétravail (peu de soleil).</li>
+      <li><b>Créatine</b> — optionnelle, soutient la force/le muscle (le complément le mieux étudié).</li>
+    </ul>
+    <p style="font-size:13.5px"><b>Où en trouver :</b> pharmacie/parapharmacie (conseil + qualité, idéal pour la vit. D), supermarché (multivitamines basiques), ou marques de nutrition sportive (ESN, MyProtein, Bulk, Decathlon) pour whey &amp; créatine.</p>
+    <p class="note">Le plus malin : une prise de sang via ton médecin pour cibler ce qui te manque vraiment, et un mot au pharmacien (interactions éventuelles).</p>
+  </div>
+</div>
+
+<!-- SÉANCES (GAMIFIÉ) -->
+<div class="panel" id="seances">
+  <div class="card">
+    <h2>🎮 Ma progression</h2>
+    <div class="grid">
+      <div class="stat"><div class="num" id="g-level">1</div><div class="lbl" id="g-levelname">Débutant</div></div>
+      <div class="stat"><div class="num" id="g-streak">0</div><div class="lbl">🔥 Semaines</div></div>
+      <div class="stat"><div class="num" id="g-total">0</div><div class="lbl">Séances</div></div>
+      <div class="stat"><div class="num" id="g-xp">0</div><div class="lbl">XP</div></div>
+    </div>
+    <h3 id="g-nextlbl">Prochain niveau</h3>
+    <div class="bar"><div id="g-xpbar" style="width:0%;background:linear-gradient(90deg,#7c3aed,#2563eb)"></div></div>
+    <p class="note" id="g-xptxt"></p>
+  </div>
+  <div class="card">
+    <h2>🎯 Objectif de la semaine</h2>
+    <div class="row" style="margin-bottom:8px">
+      <label style="font-size:13px;color:#475569">Séances/semaine :</label>
+      <input type="number" id="g-goal" min="1" max="7" style="width:70px">
+      <button class="act ghost" id="g-savegoal">OK</button>
+    </div>
+    <div class="bar"><div id="g-weekbar" style="width:0%;background:linear-gradient(90deg,#22c55e,#16a34a)"></div></div>
+    <p class="note" id="g-weektxt"></p>
+  </div>
+  <div class="card">
+    <h2>➕ J'ai fait ma séance</h2>
+    <p style="font-size:13.5px">Clique dès que c'est fait — c'est le geste qui compte, pas la perf.</p>
+    <div class="row">
+      <button class="act" id="g-salle">🏢 Salle</button>
+      <button class="act" id="g-maison">🏠 Maison</button>
+      <button class="act ghost" id="g-marche">🚶 Marche</button>
+    </div>
+    <div id="g-celebrate" class="milestone" style="display:none"></div>
+  </div>
+  <div class="card">
+    <h2>🏅 Trophées</h2>
+    <div id="g-badges" class="grid"></div>
+  </div>
+  <div class="card">
+    <h2>⛓️ Ne casse pas la chaîne</h2>
+    <p class="note">8 dernières semaines — chaque pastille = un jour avec séance.</p>
+    <div id="g-heatmap" style="display:flex;flex-wrap:wrap;gap:3px;margin-top:8px"></div>
+  </div>
+</div>
+
+<!-- MOTIVATION -->
+<div class="panel" id="motiv">
+  <div class="card">
+    <div class="motiv" id="motiv-msg">Appuie sur le bouton quand tu en as besoin 👇</div>
+    <div style="text-align:center; margin-top:14px"><button class="act" id="motiv-btn">💥 J'ai besoin de motivation</button></div>
+  </div>
+  <div class="card">
+    <h2>🧠 Garde ça en tête</h2>
+    <ul>
+      <li><b>La régularité bat la perfection.</b> Un écart ne ruine rien.</li>
+      <li><b>Vise le process, pas la balance.</b></li>
+      <li><b>-1 kg/semaine = -52 kg/an.</b></li>
+      <li><b>Note tes victoires non-balance</b> : mieux dormir, escaliers sans souffler.</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h2>📅 Mes habitudes du jour</h2>
+    <div id="streak-box" style="margin-top:8px"></div>
+  </div>
+</div>
+
+<p class="note" style="text-align:center;margin:18px 0">Données privées, synchronisées via ton compte. Je ne suis pas médecin — un avis médical est recommandé vu ton point de départ.</p>
+</div>
+
+<script>
+/* ============================================================
+   CONFIGURATION — À REMPLIR (voir README.md)
+   Récupère ces 2 valeurs dans Supabase > Project Settings > API
+   ============================================================ */
+const SUPABASE_URL      = "https://komdrnxcnwybedwnfafj.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_Jjo8OomzyMxcIWqevpNSfA_PgRFAz5m";
+/* ============================================================ */
+
+const HEIGHT = 1.87;
+let db = null, user = null;
+let weights = [], target = 95, habitsToday = {};
+let workouts = [], goal = 3;
+
+const $ = id => document.getElementById(id);
+const todayISO = () => new Date().toISOString().slice(0,10);
+const sorted = () => [...weights].sort((a,b)=> a.date.localeCompare(b.date));
+
+// ---------- Démarrage / Auth ----------
+const configured = SUPABASE_URL.startsWith("https://") && !SUPABASE_URL.includes("TON-PROJET") && !SUPABASE_ANON_KEY.includes("TA_CLE");
+
+if (configured) {
+  db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  db.auth.getSession().then(({ data }) => route(data.session));
+  db.auth.onAuthStateChange((_e, session) => route(session));
+} else {
+  // Pas configuré : on montre quand même l'app avec l'avertissement (mode démo, données non sauvegardées)
+  $("auth").classList.add("hidden");
+  $("app").classList.remove("hidden");
+  $("setup-warn").classList.remove("hidden");
+}
+
+function route(session) {
+  if (session && session.user) {
+    user = session.user;
+    $("auth").classList.add("hidden");
+    $("app").classList.remove("hidden");
+    loadData();
+  } else {
+    user = null;
+    $("app").classList.add("hidden");
+    $("auth").classList.remove("hidden");
+  }
+}
+
+// ---------- Login UI (email + mot de passe, compte unique) ----------
+let mode = "login";   // "login" = se connecter | "signup" = créer le compte (1re fois)
+$("toggle-mode").onclick = () => {
+  mode = mode === "login" ? "signup" : "login";
+  $("auth-title").textContent  = mode === "login" ? "Connexion" : "Créer mon compte";
+  $("auth-btn").textContent     = mode === "login" ? "Se connecter" : "Créer mon compte";
+  $("toggle-txt").textContent   = mode === "login" ? "Première installation ?" : "Déjà un compte ?";
+  $("toggle-mode").textContent  = mode === "login" ? "Créer mon compte" : "Se connecter";
+  setMsg("", "");
+};
+function setMsg(t, cls){ const m=$("auth-msg"); m.textContent=t; m.className="msg "+(cls||""); }
+
+$("auth-btn").onclick = async () => {
+  const email = $("email").value.trim(), password = $("password").value;
+  if (!email || !password) { setMsg("Email et mot de passe requis.", "err"); return; }
+  if (mode === "signup" && password.length < 8) { setMsg("Mot de passe d'au moins 8 caractères.", "err"); return; }
+  setMsg("…", "");
+  if (mode === "signup") {
+    const { error } = await db.auth.signUp({ email, password });
+    if (error) setMsg(error.message, "err");
+    else { setMsg("Compte créé ✅ Connecte-toi (désactive ensuite les inscriptions, cf. README).", "ok"); mode = "login"; }
+  } else {
+    const { error } = await db.auth.signInWithPassword({ email, password });
+    if (error) setMsg("Email ou mot de passe incorrect.", "err");
+  }
+};
+$("password").addEventListener("keydown", e => { if (e.key === "Enter") $("auth-btn").click(); });
+$("logout").onclick = async () => { await db.auth.signOut(); };
+
+// ---------- Chargement des données ----------
+async function loadData() {
+  // settings
+  let { data: s } = await db.from("settings").select("*").eq("user_id", user.id).maybeSingle();
+  if (!s) { await db.from("settings").insert({ user_id: user.id, target_weight: 95, workout_goal: 3 }); target = 95; goal = 3; }
+  else { target = Number(s.target_weight) || 95; goal = s.workout_goal || 3; }
+  // weights
+  let { data: w } = await db.from("weights").select("id,date,kg").order("date");
+  weights = (w || []).map(r => ({ id: r.id, date: r.date, kg: Number(r.kg) }));
+  // habits du jour
+  let { data: h } = await db.from("habits").select("data").eq("date", todayISO()).maybeSingle();
+  habitsToday = (h && h.data) ? h.data : {};
+  // séances
+  let { data: wk } = await db.from("workouts").select("id,date,type,morning").order("date");
+  workouts = (wk || []).map(r => ({ id: r.id, date: r.date, type: r.type, morning: r.morning }));
+  $("in-date").value = todayISO();
+  $("in-target").value = target;
+  renderAll(); renderHabits(); renderGame();
+}
+
+// ---------- Tabs ----------
+document.querySelectorAll(".tab").forEach(t => {
+  t.onclick = () => {
+    document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
+    document.querySelectorAll(".panel").forEach(x=>x.classList.remove("active"));
+    t.classList.add("active"); $(t.dataset.p).classList.add("active");
+    if (t.dataset.p === "suivi") renderChart();
+    if (t.dataset.p === "seances") renderGame();
+  };
+});
+
+// ---------- Actions Suivi ----------
+$("add-btn").onclick = async () => {
+  const d = $("in-date").value, kg = parseFloat($("in-kg").value);
+  if (!d || !kg) { alert("Indique une date et un poids."); return; }
+  if (db && user) {
+    const { error } = await db.from("weights").upsert(
+      { user_id: user.id, date: d, kg }, { onConflict: "user_id,date" });
+    if (error) { alert("Erreur : " + error.message); return; }
+  }
+  const ex = weights.find(w => w.date === d);
+  if (ex) ex.kg = kg; else weights.push({ id: "tmp-"+d, date: d, kg });
+  $("in-kg").value = ""; renderAll();
+  if (db && user) reloadWeights();
+};
+
+async function reloadWeights() {
+  let { data: w } = await db.from("weights").select("id,date,kg").order("date");
+  weights = (w || []).map(r => ({ id: r.id, date: r.date, kg: Number(r.kg) }));
+  renderAll();
+}
+
+$("save-target").onclick = async () => {
+  target = parseFloat($("in-target").value) || target;
+  if (db && user) await db.from("settings").upsert({ user_id: user.id, target_weight: target }, { onConflict: "user_id" });
+  renderAll();
+};
+
+// ---------- Rendu ----------
+function renderStats() {
+  const s = sorted();
+  if (!s.length) {
+    ["s-current","s-lost","s-left","s-bmi"].forEach(id=>$(id).textContent="–");
+    $("prog-bar").style.width="0%"; $("prog-txt").textContent="Note ta première pesée pour démarrer.";
+    $("milestone").style.display="none"; return;
+  }
+  const start = s[0].kg, cur = s[s.length-1].kg;
+  const lost = start - cur, left = Math.max(0, cur - target);
+  const bmi = cur / (HEIGHT*HEIGHT);
+  $("s-current").textContent = cur.toFixed(1);
+  $("s-lost").textContent = (lost>=0?"-":"+") + Math.abs(lost).toFixed(1);
+  $("s-left").textContent = left.toFixed(1);
+  $("s-bmi").textContent = bmi.toFixed(1);
+  const total = start - target;
+  const pct = total>0 ? Math.min(100, Math.max(0, (lost/total)*100)) : 0;
+  $("prog-bar").style.width = pct.toFixed(0)+"%";
+  $("prog-txt").textContent = `${pct.toFixed(0)}% du chemin — départ ${start.toFixed(1)} kg → objectif ${target.toFixed(1)} kg.`;
+  const m = $("milestone");
+  if (lost >= 1 && Math.floor(cur/5) < Math.floor(start/5)) {
+    m.style.display="block";
+    m.textContent = `🎉 Tu es passé sous les ${(Math.floor(cur/5)*5)+5} kg. Continue !`;
+  } else m.style.display="none";
+}
+
+function renderHist() {
+  const s = sorted().slice().reverse(); const tb = $("hist"); tb.innerHTML="";
+  s.forEach((w,i)=>{
+    const prev = s[i+1], delta = prev ? (w.kg-prev.kg) : 0;
+    const dStr = prev ? ((delta<=0?"":"+")+delta.toFixed(1)) : "—";
+    const color = delta<0?"#15803d":delta>0?"#b91c1c":"#94a3b8";
+    const tr=document.createElement("tr");
+    tr.innerHTML=`<td>${w.date}</td><td>${w.kg.toFixed(1)} kg</td>
+      <td style="color:${color};font-weight:600">${dStr}</td>
+      <td><span class="del" data-id="${w.id}" data-date="${w.date}">✕</span></td>`;
+    tb.appendChild(tr);
+  });
+  tb.querySelectorAll(".del").forEach(b=> b.onclick=async ()=>{
+    if (db && user && !String(b.dataset.id).startsWith("tmp-"))
+      await db.from("weights").delete().eq("id", b.dataset.id);
+    weights = weights.filter(w => w.date !== b.dataset.date);
+    renderAll();
+  });
+}
+
+let chart;
+function renderChart() {
+  const s = sorted(); const ctx = $("chart"); if (!ctx) return;
+  if (chart) chart.destroy();
+  chart = new Chart(ctx, {
+    type:"line",
+    data:{ labels: s.map(w=>w.date), datasets:[
+      { label:"Poids", data:s.map(w=>w.kg), borderColor:"#2563eb", backgroundColor:"rgba(37,99,235,.12)", fill:true, tension:.3, pointRadius:4, pointBackgroundColor:"#2563eb" },
+      { label:"Objectif", data:s.map(()=>target), borderColor:"#22c55e", borderDash:[6,5], pointRadius:0, fill:false }
+    ]},
+    options:{ responsive:true, plugins:{legend:{labels:{boxWidth:12,font:{size:11}}}}, scales:{ y:{ ticks:{callback:v=>v+" kg"} } } }
+  });
+}
+function renderAll(){ renderStats(); renderHist(); renderChart(); }
+
+// ---------- Motivation ----------
+const msgs = [
+  "Tu ne regretteras jamais une séance que tu as faite. Lève-toi.",
+  "Le déficit d'aujourd'hui, c'est le pantalon plus large dans un mois.",
+  "Personne n'a maigri en un jour. Mais personne sans commencer un jour.",
+  "Ton genou se renforce à chaque répétition propre. Continue.",
+  "Tu n'as pas à être parfait. Juste à ne pas abandonner.",
+  "La balance n'a pas bougé ? Ton corps change. Fais confiance au process.",
+  "5-4-3-2-1, debout. Ton futur toi te dit merci.",
+  "Un repas équilibré de plus. Une marche de plus. C'est ça, gagner.",
+  "C'est une suite de petites décisions. Prends la bonne, maintenant.",
+  "L'envie de sucre passe en 10 min. Bois un grand verre d'eau et attends."
+];
+$("motiv-btn").onclick = () => { $("motiv-msg").textContent = msgs[Math.floor(Math.random()*msgs.length)]; };
+
+// ---------- Habitudes ----------
+const habitList = ["💧 2 L d'eau","🍗 Protéines à chaque repas","🚶 Bougé aujourd'hui","😴 Couché tôt","🚫 Pas de soda/alcool"];
+function renderHabits() {
+  const box = $("streak-box"); box.innerHTML="";
+  habitList.forEach((h,i)=>{
+    const div=document.createElement("div"); div.style.cssText="padding:7px 0;font-size:14px";
+    div.innerHTML=`<label style="cursor:pointer"><input type="checkbox" ${habitsToday[i]?"checked":""}> ${h}</label>`;
+    box.appendChild(div);
+    div.querySelector("input").onchange = async e => {
+      habitsToday[i] = e.target.checked;
+      if (db && user) await db.from("habits").upsert(
+        { user_id: user.id, date: todayISO(), data: habitsToday }, { onConflict: "user_id,date" });
+    };
+  });
+}
+
+// ---------- Gamification des séances ----------
+const XP_BY = { salle:100, maison:70, marche:40 };
+const LEVELS = [
+  {min:0,name:"Débutant"},{min:300,name:"Motivé"},{min:800,name:"Régulier"},
+  {min:1600,name:"Assidu"},{min:3000,name:"Machine"},{min:5000,name:"Légende"}
+];
+const BADGES = [
+  {id:"first",icon:"🎯",name:"Premier pas",test:s=>s.total>=1},
+  {id:"five",icon:"🔥",name:"Sur la lancée",test:s=>s.total>=5},
+  {id:"fifteen",icon:"💪",name:"Dans le rythme",test:s=>s.total>=15},
+  {id:"thirty",icon:"🏆",name:"Pilier",test:s=>s.total>=30},
+  {id:"early",icon:"🌅",name:"Lève-tôt",test:s=>s.morning>=1},
+  {id:"week",icon:"📅",name:"Semaine parfaite",test:s=>s.bestStreak>=1},
+  {id:"chain3",icon:"⛓️",name:"Chaîne de 3",test:s=>s.bestStreak>=3},
+  {id:"machine",icon:"🚀",name:"Machine",test:s=>s.level>=5}
+];
+function weekKey(d){
+  const dt=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));
+  const day=dt.getUTCDay()||7; dt.setUTCDate(dt.getUTCDate()+4-day);
+  const ys=new Date(Date.UTC(dt.getUTCFullYear(),0,1));
+  const wn=Math.ceil((((dt-ys)/86400000)+1)/7);
+  return dt.getUTCFullYear()+"-W"+String(wn).padStart(2,"0");
+}
+function gStats(ws, gl){
+  let xp=0, morning=0; const wc={};
+  ws.forEach(w=>{ xp+=XP_BY[w.type]||40; if(w.morning) morning++; const k=weekKey(new Date(w.date)); wc[k]=(wc[k]||0)+1; });
+  const total=ws.length;
+  let li=0; for(let i=0;i<LEVELS.length;i++) if(xp>=LEVELS[i].min) li=i;
+  const cur=LEVELS[li], next=LEVELS[li+1]||null;
+  let curStreak=0,bestStreak=0; const now=new Date();
+  if(total>0){
+    const first=ws.map(w=>new Date(w.date)).sort((a,b)=>a-b)[0];
+    const seq=[]; const seen=new Set(); let c=new Date(first);
+    while(c<=now){ const k=weekKey(c); if(!seen.has(k)){seen.add(k);seq.push(k);} c.setDate(c.getDate()+7); }
+    const nk=weekKey(now); if(!seen.has(nk)) seq.push(nk);
+    let run=0; seq.forEach(k=>{ if((wc[k]||0)>=gl){run++; if(run>bestStreak)bestStreak=run;} else run=0; });
+    for(let i=seq.length-1;i>=0;i--){ const met=(wc[seq[i]]||0)>=gl; if(i===seq.length-1 && !met) continue; if(met) curStreak++; else break; }
+  }
+  return {total,xp,morning,level:li+1,levelName:cur.name,cur,next,wc,curStreak,bestStreak,thisWeek:wc[weekKey(now)]||0};
+}
+function renderGame(){
+  const s=gStats(workouts, goal);
+  $("g-level").textContent=s.level;
+  $("g-levelname").textContent=s.levelName;
+  $("g-streak").textContent=s.curStreak;
+  $("g-total").textContent=s.total;
+  $("g-xp").textContent=s.xp;
+  if(s.next){
+    const pct=Math.min(100,((s.xp-s.cur.min)/(s.next.min-s.cur.min))*100);
+    $("g-xpbar").style.width=pct.toFixed(0)+"%";
+    $("g-nextlbl").textContent="Vers le niveau « "+s.next.name+" »";
+    $("g-xptxt").textContent=(s.next.min-s.xp)+" XP avant le prochain niveau.";
+  } else {
+    $("g-xpbar").style.width="100%";
+    $("g-nextlbl").textContent="Niveau max 🏆";
+    $("g-xptxt").textContent="Tu es au sommet. Respect.";
+  }
+  const wpct=Math.min(100,(s.thisWeek/goal)*100);
+  $("g-weekbar").style.width=wpct.toFixed(0)+"%";
+  $("g-weektxt").textContent=s.thisWeek+"/"+goal+" séances cette semaine"+(s.thisWeek>=goal?" ✅ objectif atteint !":"");
+  $("g-goal").value=goal;
+  const bb=$("g-badges"); bb.innerHTML="";
+  BADGES.forEach(b=>{ const on=b.test(s); const d=document.createElement("div"); d.className="stat";
+    d.style.opacity=on?"1":"0.35";
+    d.innerHTML='<div style="font-size:26px">'+(on?b.icon:"🔒")+'</div><div class="lbl">'+b.name+'</div>';
+    bb.appendChild(d); });
+  const hm=$("g-heatmap"); hm.innerHTML="";
+  const days=new Set(workouts.map(w=>w.date));
+  for(let i=55;i>=0;i--){ const d=new Date(); d.setDate(d.getDate()-i); const iso=d.toISOString().slice(0,10);
+    const cell=document.createElement("div"); cell.title=iso;
+    cell.style.cssText="width:13px;height:13px;border-radius:3px;background:"+(days.has(iso)?"#16a34a":"#e7ebf1");
+    hm.appendChild(cell); }
+}
+async function addWorkout(type){
+  const before=gStats(workouts,goal);
+  const morning=new Date().getHours()<12;
+  if (db && user) {
+    const { data: row, error } = await db.from("workouts").insert({ user_id:user.id, date:todayISO(), type, morning }).select().single();
+    if (!error && row) workouts.push({ id:row.id, date:row.date, type:row.type, morning:row.morning });
+  } else { workouts.push({ id:"tmp", date:todayISO(), type, morning }); }
+  const after=gStats(workouts,goal);
+  let msg="🎉 Séance enregistrée ! +"+(XP_BY[type]||40)+" XP";
+  if(after.level>before.level) msg+=" · 🆙 Niveau « "+after.levelName+" » !";
+  const nb=BADGES.find(b=>!b.test(before)&&b.test(after));
+  if(nb) msg+=" · 🏅 Trophée : "+nb.name+" !";
+  if(after.thisWeek===goal) msg+=" · 🎯 Objectif de la semaine atteint !";
+  const c=$("g-celebrate"); c.style.display="block"; c.textContent=msg;
+  renderGame();
+}
+if ($("g-salle")) {
+  $("g-salle").onclick=()=>addWorkout("salle");
+  $("g-maison").onclick=()=>addWorkout("maison");
+  $("g-marche").onclick=()=>addWorkout("marche");
+  $("g-savegoal").onclick=async ()=>{
+    goal=Math.max(1,Math.min(7,parseInt($("g-goal").value)||3));
+    if(db&&user) await db.from("settings").upsert({ user_id:user.id, workout_goal:goal }, { onConflict:"user_id" });
+    renderGame();
+  };
+}
+
+// ---------- PWA : enregistrement du service worker ----------
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./sw.js").catch(() => {});
+  });
+}
+</script>
+</body>
+</html>
